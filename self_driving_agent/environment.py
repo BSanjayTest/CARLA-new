@@ -181,29 +181,8 @@ class SimEnv(object):
             return 0.0
         return self.current_route_index / max(len(self.route_waypoints) - 1, 1)
 
-    # ── Actor Creation ──────────────────────────────────────────────
-    def _shorten_traffic_lights(self):
-        """Set all traffic lights to short cycle times."""
-        tl_actors = self.world.get_actors().filter('traffic.traffic_light')
-        for tl in tl_actors:
-            tl.set_red_time(2.0)
-            tl.set_green_time(4.0)
-            tl.set_yellow_time(1.0)
-            tl.freeze(True)
-            tl.set_state(carla.TrafficLightState.Red)
-        # Tick a few frames to let all lights settle into Red state
-        for _ in range(5):
-            self.world.tick()
-        # Now unfreeze so they can cycle normally
-        for tl in tl_actors:
-            tl.freeze(False)
-        print(f"Traffic lights: {len(tl_actors)} lights set to fast cycle (R=2s G=4s Y=1s)")
-
     def create_actors(self):
         self.actor_list = []
-
-        # Shorten traffic light cycles
-        self._shorten_traffic_lights()
 
         # Generate route if start/goal specified
         if self.start_point_index is not None and self.goal_point_index is not None:
