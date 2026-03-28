@@ -19,6 +19,7 @@ from environment import SimEnv
 
 def run():
     env = None
+    ep_stats = []
     try:
         buffer_size = 1e4
         batch_size = 32
@@ -65,6 +66,13 @@ def run():
 
             env.create_actors()
             env.generate_episode(model, replay_buffer, ep, action_map, eval=False)
+
+            # Store stats before reset
+            ep_stats.append({
+                'episode': ep,
+                'reward': env.total_rewards,
+            })
+
             env.reset()
 
             # Save weights every 10 episodes
@@ -73,8 +81,65 @@ def run():
                 print(f"=== SAVED weights/model_ep_{ep} (Episode {ep}, Reward: {env.total_rewards:.0f}) ===")
 
             print(f"[Episode {ep} done] Reward: {env.total_rewards:.0f}")
+
+        # GENERATE FINAL TRAINING REPORT
+        print("\n" + "="*40)
+        print("FINAL TRAINING REPORT")
+        print("="*40)
+        if ep_stats:
+            avg_reward = sum(s['reward'] for s in ep_stats) / len(ep_stats)
+            max_reward = max(s['reward'] for s in ep_stats)
+            min_reward = min(s['reward'] for s in ep_stats)
+            print(f"Total Episodes Trained: {len(ep_stats)}")
+            print(f"Average Reward per Episode: {avg_reward:.2f}")
+            print(f"Best Episode Reward: {max_reward:.2f}")
+            print(f"Worst Episode Reward: {min_reward:.2f}")
+
+            # Simple grading logic
+            if avg_reward > 8000:
+                grade = "A+"
+            elif avg_reward > 5000:
+                grade = "A"
+            elif avg_reward > 3000:
+                grade = "B"
+            elif avg_reward > 1000:
+                grade = "C"
+            elif avg_reward > 0:
+                grade = "D"
+            else:
+                grade = "F"
+            print(f"Training Performance Grade: {grade}")
+        print("="*40 + "\n")
     except KeyboardInterrupt:
         print("\nTraining interrupted")
+        # Show report for episodes completed so far
+        print("\n" + "="*40)
+        if ep_stats:
+            avg_reward = sum(s['reward'] for s in ep_stats) / len(ep_stats)
+            max_reward = max(s['reward'] for s in ep_stats)
+            min_reward = min(s['reward'] for s in ep_stats)
+            print("FINAL TRAINING REPORT (Partial)")
+            print("="*40)
+            print(f"Total Episodes Trained: {len(ep_stats)}")
+            print(f"Average Reward per Episode: {avg_reward:.2f}")
+            print(f"Best Episode Reward: {max_reward:.2f}")
+            print(f"Worst Episode Reward: {min_reward:.2f}")
+            if avg_reward > 8000:
+                grade = "A+"
+            elif avg_reward > 5000:
+                grade = "A"
+            elif avg_reward > 3000:
+                grade = "B"
+            elif avg_reward > 1000:
+                grade = "C"
+            elif avg_reward > 0:
+                grade = "D"
+            else:
+                grade = "F"
+            print(f"Training Performance Grade: {grade}")
+        else:
+            print("No episodes completed - no report available")
+        print("="*40 + "\n")
     finally:
         if env is not None:
             try:
