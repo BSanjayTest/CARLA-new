@@ -93,8 +93,20 @@ class SimEnv(object):
         if self.goal_point_index is None:
             return
         try:
-            _carla_agents = r'D:\selfdriving\PythonAPI\carla'
-            if _carla_agents not in sys.path:
+            # Find CARLA agents path (try env var, then common locations)
+            _carla_root = os.environ.get('CARLA_ROOT', '')
+            _carla_agents = os.path.join(_carla_root, 'PythonAPI', 'carla') if _carla_root else ''
+            if not _carla_agents or not os.path.exists(_carla_agents):
+                # Search common install locations
+                for _drive in ['C', 'D', 'E']:
+                    for _folder in ['CARLA', 'CARLA_0.9.16', 'selfdriving', 'carla']:
+                        _test = f'{_drive}:\\{_folder}\\PythonAPI\\carla'
+                        if os.path.exists(_test):
+                            _carla_agents = _test
+                            break
+                    if _carla_agents:
+                        break
+            if _carla_agents and _carla_agents not in sys.path:
                 sys.path.append(_carla_agents)
             from agents.navigation.global_route_planner import GlobalRoutePlanner
         except ImportError as e:

@@ -4,13 +4,22 @@ import math
 import argparse
 import numpy as np
 
-try:
-    sys.path.append(r'D:\selfdriving\PythonAPI\carla')
-except:
-    pass
+# Find CARLA agents path
+_carla_root = os.environ.get('CARLA_ROOT', '')
+_carla_agents = os.path.join(_carla_root, 'PythonAPI', 'carla') if _carla_root else ''
+if not _carla_agents or not os.path.exists(_carla_agents):
+    for _drive in ['C', 'D', 'E']:
+        for _folder in ['CARLA', 'CARLA_0.9.16', 'selfdriving', 'carla']:
+            _test = f'{_drive}:\\{_folder}\\PythonAPI\\carla'
+            if os.path.exists(_test):
+                _carla_agents = _test
+                break
+        if _carla_agents:
+            break
+if _carla_agents:
+    sys.path.append(_carla_agents)
 
 import carla
-
 from agents.navigation.global_route_planner import GlobalRoutePlanner
 
 parser = argparse.ArgumentParser(description='PID route-following drive')

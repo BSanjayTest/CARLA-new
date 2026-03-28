@@ -6,7 +6,7 @@
 py -3.12 -m venv venv
 venv\Scripts\activate
 pip install pygame torch torchvision opencv-python numpy
-pip install "D:\selfdriving\PythonAPI\carla\dist\carla-0.9.16-cp312-cp312-win_amd64.whl"
+pip install "<CARLA_ROOT>\PythonAPI\carla\dist\carla-0.9.16-cp312-cp312-win_amd64.whl"
 python initial_setup.py
 ```
 
